@@ -1,0 +1,32 @@
+{
+  "eq": {
+    "name": "eq",
+    "type": "eq",
+    "inherits": [],
+    "properties": {
+      "spawn2": {
+        "name": "spawn2",
+        "type": "function",
+        "args": {
+          "npc_type": {
+            "name": "npc_type",
+            "type": "number",
+            "doc": "npc_type :: [npc_type](https://questapi.firebaseapp.com/scripts/npc_type)"
+          },
+          "grid": {
+            "name": "grid",
+            "type": "number",
+            "doc": "grid number, if any, default to 0"
+          },
+          "unused": {
+            "name": "unused",
+            "type": "number",
+            "doc": "unusued field, default to 0"
+          }
+        },
+        "doc": "spawns an NPC from database"
+      }
+    },
+    "doc": "EverQuest Global Namespace"
+  }
+}

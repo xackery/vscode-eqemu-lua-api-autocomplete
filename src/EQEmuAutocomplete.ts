@@ -1,10 +1,10 @@
-"use strict"
+"use strict";
 
-import vscode = require('vscode')
-import EQEmuApiData from "./EQEmuApiData"
-import { getLastMatch, keys, assign } from "./utils"
+import vscode = require('vscode');
+import EQEmuApiData from "./EQEmuApiData";
+import { getLastMatch, keys, assign } from "./utils";
 
-const wordsRegex = /([\w\[\]]+\.[\w\[\]\.]*)/g
+const wordsRegex = /([\w\[\]]+\.[\w\[\]\.]*)/g;
 
 export class EQEmuAutocomplete implements vscode.CompletionItemProvider {
     constructor(private apiData: EQEmuApiData) { }
@@ -16,10 +16,8 @@ export class EQEmuAutocomplete implements vscode.CompletionItemProvider {
             let lineText = document.lineAt(position.line).text;
             let lineTillCurrentPosition = lineText.substr(0, position.character);
 
-            let match = getLastMatch(wordsRegex, lineTillCurrentPosition);
-            let line = match ? match[1] : "";
-
-            let words = line.split(".");
+            let match:string = getLastMatch(wordsRegex, lineTillCurrentPosition);
+            let words = match.split(".");
             words.pop();
 
             let type = this.apiData.findType(words);
@@ -34,7 +32,7 @@ export class EQEmuAutocomplete implements vscode.CompletionItemProvider {
     }
 
     private toCompletionItems(types: EQEmuTypeMap): vscode.CompletionItem[] {
-        return keys(types).map(key => this.toCompletionItem(types[key], <string>key))
+        return keys(types).map(key => this.toCompletionItem(types[key], <string>key));
     }
 
     private toCompletionItem(type: EQEmuType, key: string): vscode.CompletionItem {

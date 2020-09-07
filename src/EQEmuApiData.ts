@@ -21,7 +21,40 @@ export default class EQEmuApiData {
     private defines: EQEmuTypeMap;
 
     constructor(private dataPath: string) {
-        this.loadData(dataPath);
+        const classes = this.loadDataFile(dataPath + "/classes.json");
+        const defines = this.loadDataFile(dataPath + "/defines.json");
+        // Add some additional autocomplete triggers (when typing on blank line or pressing ctrl-space)
+        /*Object.keys(additionalTriggers).forEach(trigger => {
+            let luaType:string = additionalTriggers[trigger];
+            if (luaType in classes) {
+                classes[trigger] = classes[luaType];
+            }
+        });*/
+
+       /* Object.keys(additionalTriggers).forEach(trigger => {
+            let luaType = additionalTriggers[trigger];
+            if (luaType in classes) {
+                classes[trigger] = classes[luaType];
+            }
+        });*/
+
+        
+
+
+        // LuaPlayer and LuaEntity inherit from LuaControl
+        // Instead of doing this manually it would be best to adjust the scraper to read the "extends" keyword
+        // in the docs and do this automatically.
+        // Object.assign(classes.LuaPlayer.properties, classes.LuaControl.properties)
+        // Object.assign(classes.LuaEntity.properties, classes.LuaControl.properties)
+
+        this.classes = classes;
+        this.defines = defines;
+        // todo: revisit this
+        this.classes.defines = {
+            type: "define",
+            properties: defines
+        };
+        
     }
 
     public findType(words: string[]): EQEmuType {
@@ -61,13 +94,14 @@ export default class EQEmuApiData {
             // Then the complete type list
             let parentType = type.type;
 
-            // Special handling for defines
+            /*// Special handling for defines
             if (/defines/.test(parentType!)) {
                 let [__, defineName] = parentType!.split(".");
                 //let define = this.defines[defineName]
+                
                 return _.get(this.defines, [defineName, "properties"]);
                 // return defineName && this.defines[defineName] || null
-            }
+            }*/
 
             type = this.classes[parentType!];
 
@@ -78,33 +112,6 @@ export default class EQEmuApiData {
         }
 
         return type;
-    }
-
-    private loadData(dataPath: string) {
-        const classes = this.loadDataFile(dataPath + "/classes.json");
-        const defines = this.loadDataFile(dataPath + "/defines.json");
-
-        // Add some additional autocomplete triggers (when typing on blank line or pressing ctrl-space)
-        Object.keys(additionalTriggers).forEach(trigger => {
-            let luaType = additionalTriggers[trigger];
-            if (luaType in classes) {
-                classes[trigger] = classes[luaType];
-            }
-        });
-
-        // LuaPlayer and LuaEntity inherit from LuaControl
-        // Instead of doing this manually it would be best to adjust the scraper to read the "extends" keyword
-        // in the docs and do this automatically.
-        // Object.assign(classes.LuaPlayer.properties, classes.LuaControl.properties)
-        // Object.assign(classes.LuaEntity.properties, classes.LuaControl.properties)
-
-        this.classes = classes;
-        this.defines = defines;
-        // todo: revisit this
-        this.classes.defines = {
-            type: "define",
-            properties: defines
-        };
     }
 
     private loadDataFile(fileName: string): EQEmuTypeMap {

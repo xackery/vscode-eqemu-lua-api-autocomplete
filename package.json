@@ -2,7 +2,7 @@
   "name": "eqemu-lua-api-autocomplete",
   "displayName": "EQEmu Lua API Autocomplete",
   "description": "Autocompletion for the EQEMU Lua API",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "publisher": "xackery",
   "repository": {
     "type": "git",

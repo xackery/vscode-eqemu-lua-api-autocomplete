@@ -51,7 +51,7 @@ export function activate(context: vscode.ExtensionContext) {
 				const {{ $ci.VariableName }}{{ .VariableName }} = new vscode.CompletionItem('{{ .Name }}', vscode.CompletionItemKind.{{ .Type }});
 				
 				{{ $ci.VariableName }}{{ .VariableName }}.detail = "{{ .Syntax }}";
-				{{ $ci.VariableName }}{{ .VariableName }}.insertText = new vscode.SnippetString('debug(${0:message:string})');
+				{{ $ci.VariableName }}{{ .VariableName }}.insertText = new vscode.SnippetString('{{ .Snippet }}');
 				{{ $ci.VariableName }}{{ .VariableName }}.documentation = new vscode.MarkdownString("{{ .Description }}");
 				results.push({{ $ci.VariableName }}{{ .VariableName }});				
 				{{ end }}

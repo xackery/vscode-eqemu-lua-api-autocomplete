@@ -40,6 +40,7 @@ type Property struct {
 	Type        string
 	Description string
 	Syntax      string
+	Snippet     string
 }
 
 // VariableName returns a variable-friendly version of a name
@@ -187,6 +188,18 @@ func scrape(path string, info os.FileInfo, err error) error {
 		prop.Name = strings.TrimSpace(prop.Name)
 		if prop.Type == "" {
 			prop.Type = "Method"
+		}
+		if prop.Type == "Property" {
+			prop.Snippet = prop.Name
+			if prop.Syntax == "" {
+				prop.Syntax = fmt.Sprintf("%s.%s", currentCompletionItem.Name, prop.Name)
+			}
+		} else {
+			//debug(${0:message:string})
+			prop.Snippet = prop.Name + "()"
+			if prop.Syntax == "" {
+				prop.Syntax = fmt.Sprintf("%s.%s()", currentCompletionItem.Name, prop.Name)
+			}
 		}
 		currentCompletionItem.Properties = append(currentCompletionItem.Properties, prop)
 	}

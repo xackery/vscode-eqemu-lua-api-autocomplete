@@ -44,15 +44,15 @@ export class EQEmuAutocomplete implements vscode.CompletionItemProvider {
             kind: vscode.CompletionItemKind.Property
         });
 
-        if (type.type === "function") {
-            assign(completionItem, {
-                detail: name,
-                kind: vscode.CompletionItemKind.Function
-            });
+        
+        if (type.type === "function") {      
+            assign(completionItem, { detail: name, kind: vscode.CompletionItemKind.Function });
         } else if (type.type === "define") {
-            assign(completionItem, {
-                kind: vscode.CompletionItemKind.Constant
-            });
+            assign(completionItem, { kind: vscode.CompletionItemKind.Constant });
+        } else if (type.type === "property") {
+            assign(completionItem, { kind: vscode.CompletionItemKind.Property });
+        } else if (type.type === "class") {
+            assign(completionItem, { kind: vscode.CompletionItemKind.Class });
         }
 
         return completionItem;

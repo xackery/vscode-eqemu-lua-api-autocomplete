@@ -2,20 +2,6 @@ import * as fs from"fs";
 
 const brackets = /\[.*\]/g;
 
-const additionalTriggers = {
-    game: "LuaGameScript",
-    script: "LuaBootstrap",
-    remote: "LuaRemote",
-    commands: "LuaCommandProcessor",
-    player: "LuaPlayer",
-    entity: "LuaEntity",
-    inventory: "LuaInventory",
-    gui: "LuaGui",
-    force: "LuaForce",
-    style: "LuaStyle",
-    tile: "LuaTile",
-};
-
 export default class EQEmuApiData {
     private classes: EQEmuTypeMap;
     private defines: EQEmuTypeMap;
@@ -23,6 +9,7 @@ export default class EQEmuApiData {
     constructor(private dataPath: string) {
         const classes = this.loadDataFile(dataPath + "/classes.json");
         const defines = this.loadDataFile(dataPath + "/defines.json");
+        
         // Add some additional autocomplete triggers (when typing on blank line or pressing ctrl-space)
         /*Object.keys(additionalTriggers).forEach(trigger => {
             let luaType:string = additionalTriggers[trigger];
@@ -30,16 +17,6 @@ export default class EQEmuApiData {
                 classes[trigger] = classes[luaType];
             }
         });*/
-
-       /* Object.keys(additionalTriggers).forEach(trigger => {
-            let luaType = additionalTriggers[trigger];
-            if (luaType in classes) {
-                classes[trigger] = classes[luaType];
-            }
-        });*/
-
-        
-
 
         // LuaPlayer and LuaEntity inherit from LuaControl
         // Instead of doing this manually it would be best to adjust the scraper to read the "extends" keyword

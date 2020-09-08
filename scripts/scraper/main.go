@@ -24,6 +24,11 @@ type CompletionItem struct {
 	Properties  []Property
 }
 
+// LowerName lowers a namer to lowercase
+func (c *CompletionItem) LowerName() string {
+	return strings.ToLower(c.Name)
+}
+
 // VariableName returns a variable-friendly version of a name
 func (c *CompletionItem) VariableName() string {
 	return strings.ReplaceAll(c.Name, "_", "")
@@ -40,6 +45,11 @@ type Property struct {
 // VariableName returns a variable-friendly version of a name
 func (p *Property) VariableName() string {
 	return strings.ReplaceAll(p.Name, "_", "")
+}
+
+// LowerName lowercases a name
+func (p *Property) LowerName() string {
+	return strings.ToLower(p.Name)
 }
 
 func main() {
@@ -174,6 +184,7 @@ func scrape(path string, info os.FileInfo, err error) error {
 		}
 	}
 	if prop.Name != "" {
+		prop.Name = strings.TrimSpace(prop.Name)
 		if prop.Type == "" {
 			prop.Type = "Method"
 		}

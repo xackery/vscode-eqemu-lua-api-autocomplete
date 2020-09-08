@@ -61,6 +61,7 @@ export function activate(context: vscode.ExtensionContext) {
 	));
 {{ end }}
 
+{{ range $i, $ci := .CompletionItems }}
 	context.subscriptions.push(vscode.languages.registerHoverProvider('lua', {
 		provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {return new Promise<vscode.Hover>((resolve, reject) => {
 			const wordRange = document.getWordRangeAtPosition(position);
@@ -74,27 +75,19 @@ export function activate(context: vscode.ExtensionContext) {
                 lineTillCurrentWord = lineTillCurrentWord.split(" ").pop()!;                
             }
 			
-			if (lineTillCurrentWord === "eq") {
-				return resolve(new vscode.Hover( new vscode.MarkdownString("```lua\neq\n```\n[eq on questapi](https://questapi.firebaseapp.com/lua/eq)\n\nEQ Namespace are globally accessible functions"), wordRange));
-			}
-
-			if (lineTillCurrentWord === "eq.debug") {
-				return resolve(new vscode.Hover(new vscode.MarkdownString("```lua\neq.debug(message:string) -- void\n```\n[eq.debug on questapi](https://questapi.firebaseapp.com/lua/eq/debug)\n\nEchos a GM only debug message"), wordRange));
-            }
-
-			{{ range $i, $ci := .CompletionItems }}
 			if (lineTillCurrentWord === "{{ $ci.Name }}") {
-				return resolve(new vscode.Hover(new vscode.MarkdownString("```lua\n{{ $ci.Name }}\n```\n[{{ $ci.Name }} on questapi](https://questapi.firebaseapp.com/lua/{{ $ci.Name }}/debug)\n\n{{ $ci.Description }}"), wordRange));
+				return resolve(new vscode.Hover(new vscode.MarkdownString("```lua\n{{ $ci.Name }}\n```\n[{{ $ci.Name }} on questapi](https://questapi.firebaseapp.com/en/lua/{{ $ci.LowerName }}/debug)\n\n{{ $ci.Description }}"), wordRange));
             }
 			{{ range .Properties }}
-			if (lineTillCurrentWord === "{{ $ci.Name }}.{{ .Name }} ") {
-				return resolve(new vscode.Hover(new vscode.MarkdownString("```lua\n{{ .Syntax }}\n```\n[{{ $ci.Name }}.{{ .Name }} on questapi](https://questapi.firebaseapp.com/lua/{{$ci.Name}}/{{.Name}})\n\n{{.Description}}"), wordRange));
+			if (lineTillCurrentWord === "{{ $ci.Name }}.{{ .Name }}") {
+				return resolve(new vscode.Hover(new vscode.MarkdownString("```lua\n{{ .Syntax }}\n```\n[{{ $ci.Name }}.{{ .Name }} on questapi](https://questapi.firebaseapp.com/en/lua/{{ $ci.LowerName }}/{{ .LowerName }})\n\n{{.Description}}"), wordRange));
             }
 			{{ end }}
-			{{ end }}
 
-			return resolve(new vscode.Hover(new vscode.MarkdownString("unknown: "+lineTillCurrentWord), wordRange));
-            //return reject();
+			//return resolve(new vscode.Hover(new vscode.MarkdownString("unknown: "+lineTillCurrentWord), wordRange));
+            return reject();
 		});}
 	}));
+	
+{{ end }}
 }

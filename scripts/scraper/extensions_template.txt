@@ -1,0 +1,100 @@
+import * as vscode from 'vscode';
+
+export function activate(context: vscode.ExtensionContext) {
+
+	context.subscriptions.push(vscode.languages.registerCompletionItemProvider('lua', {
+		provideCompletionItems(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken, context: vscode.CompletionContext) {
+			const linePrefix = document.lineAt(position).text.substr(0, position.character);
+			if (position.character !== 0 && !linePrefix.endsWith('')) {
+				return undefined;
+			}
+
+			const results:vscode.CompletionItem[] = [];
+			{{ range .CompletionItems }}
+			const {{.VariableName}}Completion = new vscode.CompletionItem('{{.Name}}', vscode.CompletionItemKind.Class);
+			{{.VariableName}}Completion.insertText = new vscode.SnippetString("{{.Name}}.");
+			{{.VariableName}}Completion.documentation = new vscode.MarkdownString("{{.Description}}");
+			{{.VariableName}}Completion.command = { command: 'editor.action.triggerSuggest', title: 'Re-trigger completions...' };
+			results.push({{.VariableName}}Completion);
+			{{end}}
+			return results;
+		}
+	}));
+	
+	context.subscriptions.push(vscode.languages.registerCompletionItemProvider('lua', {
+			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+				const linePrefix = document.lineAt(position).text.substr(0, position.character);
+				if (!linePrefix.endsWith('e.other:')) {
+					return undefined;
+				}
+
+				const say = new vscode.CompletionItem('Say', vscode.CompletionItemKind.Function);
+				say.insertText = new vscode.SnippetString("Say(${1|message|})");
+				say.documentation = new vscode.MarkdownString("Say a message");
+				return [
+					say
+				];
+			}
+		}, ':' // triggered whenever a ':' is being typed
+	));
+
+{{ range $i, $ci := .CompletionItems }}
+	context.subscriptions.push(vscode.languages.registerCompletionItemProvider('lua', {
+			provideCompletionItems(document: vscode.TextDocument, position: vscode.Position) {
+				const linePrefix = document.lineAt(position).text.substr(0, position.character);
+				const results = [];
+				if (!linePrefix.endsWith('{{ $ci.Name }}.')) {
+					return undefined;
+				}
+				
+				{{ range $ci.Properties }}
+				const {{ $ci.VariableName }}{{ .VariableName }} = new vscode.CompletionItem('{{ .Name }}', vscode.CompletionItemKind.{{ .Type }});
+				
+				{{ $ci.VariableName }}{{ .VariableName }}.detail = "{{ .Syntax }}";
+				{{ $ci.VariableName }}{{ .VariableName }}.insertText = new vscode.SnippetString('debug(${0:message:string})');
+				{{ $ci.VariableName }}{{ .VariableName }}.documentation = new vscode.MarkdownString("{{ .Description }}");
+				results.push({{ $ci.VariableName }}{{ .VariableName }});				
+				{{ end }}
+				return results;
+			}
+		}, '.' // triggered whenever a '.' is being typed
+	));
+{{ end }}
+
+	context.subscriptions.push(vscode.languages.registerHoverProvider('lua', {
+		provideHover(document: vscode.TextDocument, position: vscode.Position, token: vscode.CancellationToken): vscode.ProviderResult<vscode.Hover> {return new Promise<vscode.Hover>((resolve, reject) => {
+			const wordRange = document.getWordRangeAtPosition(position);
+            if (!wordRange) {
+                return reject();
+            }
+			const linePrefix = document.lineAt(position).text.substr(0, position.character);
+			const lineText = document.lineAt(position.line).text;
+            let lineTillCurrentWord = lineText.substr(0, wordRange.end.character);
+            if (lineTillCurrentWord.search(" ") > 0) {
+                lineTillCurrentWord = lineTillCurrentWord.split(" ").pop()!;                
+            }
+			
+			if (lineTillCurrentWord === "eq") {
+				return resolve(new vscode.Hover( new vscode.MarkdownString("```lua\neq\n```\n[eq on questapi](https://questapi.firebaseapp.com/lua/eq)\n\nEQ Namespace are globally accessible functions"), wordRange));
+			}
+
+			if (lineTillCurrentWord === "eq.debug") {
+				return resolve(new vscode.Hover(new vscode.MarkdownString("```lua\neq.debug(message:string) -- void\n```\n[eq.debug on questapi](https://questapi.firebaseapp.com/lua/eq/debug)\n\nEchos a GM only debug message"), wordRange));
+            }
+
+			{{ range $i, $ci := .CompletionItems }}
+			if (lineTillCurrentWord === "{{ $ci.Name }}") {
+				return resolve(new vscode.Hover(new vscode.MarkdownString("```lua\n{{ $ci.Name }}\n```\n[{{ $ci.Name }} on questapi](https://questapi.firebaseapp.com/lua/{{ $ci.Name }}/debug)\n\n{{ $ci.Description }}"), wordRange));
+            }
+			{{ range .Properties }}
+			if (lineTillCurrentWord === "{{ $ci.Name }}.{{ .Name }} ") {
+				return resolve(new vscode.Hover(new vscode.MarkdownString("```lua\n{{ .Syntax }}\n```\n[{{ $ci.Name }}.{{ .Name }} on questapi](https://questapi.firebaseapp.com/lua/{{$ci.Name}}/{{.Name}})\n\n{{.Description}}"), wordRange));
+            }
+			{{ end }}
+			{{ end }}
+
+			return resolve(new vscode.Hover(new vscode.MarkdownString("unknown: "+lineTillCurrentWord), wordRange));
+            //return reject();
+		});}
+	}));
+}
